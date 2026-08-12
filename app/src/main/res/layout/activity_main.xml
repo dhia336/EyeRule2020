@@ -17,11 +17,11 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="28dp">
+            android:layout_marginBottom="24dp">
 
             <ImageView
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:src="@mipmap/ic_launcher"
                 android:contentDescription="@string/app_name" />
 
@@ -29,145 +29,230 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginStart="14dp">
+                android:layout_marginStart="12dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="20-20-20"
                     android:textColor="@color/text_primary"
-                    android:textSize="20sp"
+                    android:textSize="19sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Eye rule reminder"
+                    android:text="Eye Care Companion"
                     android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
+                    android:textSize="12sp" />
 
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Ring card -->
         <LinearLayout
             android:id="@+id/statusCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:gravity="center_horizontal"
             android:background="@drawable/bg_card"
-            android:padding="24dp"
+            android:padding="28dp"
             android:layout_marginBottom="16dp">
+
+            <FrameLayout
+                android:layout_width="220dp"
+                android:layout_height="220dp">
+
+                <com.eyerule.app.CircularProgressView
+                    android:id="@+id/progressRing"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:id="@+id/countdownText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--:--"
+                        android:textColor="@color/accent"
+                        android:textSize="40sp"
+                        android:textStyle="bold"
+                        android:fontFamily="monospace" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="next break in"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/bg_status_badge"
-                android:paddingStart="12dp"
-                android:paddingEnd="14dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp">
+                android:gravity="center_vertical">
 
-                <View
-                    android:id="@+id/statusDot"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:background="@drawable/dot_status" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Status: "
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/statusBadgeLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:text="Stopped"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp"
+                    android:text="STOPPED"
+                    android:textColor="@color/text_muted"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
+
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/countdownText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:text="--:--"
-                android:textColor="@color/text_primary"
-                android:textSize="46sp"
-                android:textStyle="bold"
-                android:fontFamily="monospace" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="until your next break"
-                android:textColor="@color/text_muted"
-                android:textSize="13sp" />
 
         </LinearLayout>
 
+        <!-- Interval / break length dials -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:id="@+id/intervalCard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:background="@drawable/bg_dial_card"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Interval (min)"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="12dp" />
+
+                <FrameLayout
+                    android:layout_width="84dp"
+                    android:layout_height="84dp">
+
+                    <com.eyerule.app.CircularProgressView
+                        android:id="@+id/intervalRing"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <TextView
+                        android:id="@+id/intervalValueText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="20"
+                        android:textColor="@color/text_primary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="focus"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/breakCard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:background="@drawable/bg_dial_card"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Break (sec)"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="12dp" />
+
+                <FrameLayout
+                    android:layout_width="84dp"
+                    android:layout_height="84dp">
+
+                    <com.eyerule.app.CircularProgressView
+                        android:id="@+id/breakRing"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <TextView
+                        android:id="@+id/breakValueText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="20"
+                        android:textColor="@color/text_primary"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="rest"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Toggles -->
         <LinearLayout
             android:id="@+id/settingsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/bg_card"
-            android:padding="24dp"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Interval (minutes)"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp"
-                android:layout_marginBottom="8dp" />
-
-            <EditText
-                android:id="@+id/intervalInput"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:background="@drawable/bg_input"
-                android:inputType="number"
-                android:gravity="center"
-                android:textColor="@color/text_primary"
-                android:textSize="17sp"
-                android:textColorHint="@color/text_muted"
-                android:layout_marginBottom="20dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Break length (seconds)"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp"
-                android:layout_marginBottom="8dp" />
-
-            <EditText
-                android:id="@+id/breakSecondsInput"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:background="@drawable/bg_input"
-                android:inputType="number"
-                android:gravity="center"
-                android:textColor="@color/text_primary"
-                android:textSize="17sp"
-                android:textColorHint="@color/text_muted"
-                android:layout_marginBottom="20dp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/stroke_subtle"
-                android:layout_marginBottom="16dp" />
+            android:padding="22dp"
+            android:layout_marginBottom="24dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="18dp">
 
                 <TextView
                     android:layout_width="0dp"
@@ -177,12 +262,14 @@
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
-                <CheckBox
-                    android:id="@+id/soundCheckbox"
+                <Switch
+                    android:id="@+id/soundSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:buttonTint="@color/accent" />
+                    android:thumbTint="@color/accent"
+                    android:trackTint="@color/accent_dim"
+                    android:text="" />
 
             </LinearLayout>
 
@@ -191,7 +278,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="18dp">
 
                 <TextView
                     android:layout_width="0dp"
@@ -201,12 +288,14 @@
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
-                <CheckBox
-                    android:id="@+id/unskippableCheckbox"
+                <Switch
+                    android:id="@+id/unskippableSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="false"
-                    android:buttonTint="@color/accent" />
+                    android:thumbTint="@color/accent"
+                    android:trackTint="@color/accent_dim"
+                    android:text="" />
 
             </LinearLayout>
 
@@ -224,12 +313,14 @@
                     android:textColor="@color/text_primary"
                     android:textSize="15sp" />
 
-                <CheckBox
-                    android:id="@+id/resetOnUnlockCheckbox"
+                <Switch
+                    android:id="@+id/resetOnUnlockSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="false"
-                    android:buttonTint="@color/accent" />
+                    android:thumbTint="@color/accent"
+                    android:trackTint="@color/accent_dim"
+                    android:text="" />
 
             </LinearLayout>
 
@@ -238,11 +329,11 @@
         <Button
             android:id="@+id/toggleButton"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="58dp"
             android:background="@drawable/bg_button_primary"
             android:text="Start"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
+            android:textColor="#1A1206"
+            android:textSize="17sp"
             android:textStyle="bold"
             android:textAllCaps="false"
             android:stateListAnimator="@null" />

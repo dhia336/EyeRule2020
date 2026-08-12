@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.graphics.drawable.AnimationDrawable
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Build
@@ -13,6 +14,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 
@@ -22,6 +24,7 @@ class BreakOverlayService : Service() {
     private var windowManager: WindowManager? = null
     private var timer: CountDownTimer? = null
     private var toneGenerator: ToneGenerator? = null
+    private var frameAnimation: AnimationDrawable? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -45,6 +48,30 @@ class BreakOverlayService : Service() {
             // Some devices refuse to allocate a ToneGenerator (e.g. audio in use
             // by something else) - silently skip the beep rather than crash.
         }
+    }
+
+    /**
+     * Builds a looping frame animation from PNGs named "<prefix>_01.png",
+     * "<prefix>_02.png", etc in res/drawable. Stops at the first missing
+     * number, so any frame count works with no code changes - just add or
+     * replace files with the same naming pattern. Returns null (and shows
+     * nothing) if no frames are found at all.
+     */
+    private fun loadFrameAnimation(prefix: String, frameDurationMs: Int = 110): AnimationDrawable? {
+        val anim = AnimationDrawable()
+        var count = 0
+        var i = 1
+        while (true) {
+            val name = "${prefix}_%02d".format(i)
+            val resId = resources.getIdentifier(name, "drawable", packageName)
+            if (resId == 0) break
+            anim.addFrame(resources.getDrawable(resId, theme), frameDurationMs)
+            count++
+            i++
+        }
+        if (count == 0) return null
+        anim.isOneShot = false
+        return anim
     }
 
     private fun showOverlay(breakSeconds: Int, unskippable: Boolean) {
@@ -73,6 +100,19 @@ class BreakOverlayService : Service() {
         }
 
         val accentColor = resources.getColor(R.color.accent, theme)
+
+        val animation = loadFrameAnimation("lookaway")
+        if (animation != null) {
+            frameAnimation = animation
+            val animationView = ImageView(this).apply {
+                setImageDrawable(animation)
+                scaleType = ImageView.ScaleType.FIT_CENTER
+            }
+            root.addView(
+                animationView,
+                LinearLayout.LayoutParams(200.dp(), 200.dp())
+            )
+        }
 
         val message = TextView(this).apply {
             text = "Look at something 20 feet away\nfor $breakSeconds seconds"
@@ -125,6 +165,7 @@ class BreakOverlayService : Service() {
 
         windowManager?.addView(root, params)
         overlayView = root
+        frameAnimation?.start()
 
         // Auto-dismiss after the configured break duration, even if the user
         // never taps Skip.
@@ -141,6 +182,8 @@ class BreakOverlayService : Service() {
 
     private fun dismissOverlay() {
         timer?.cancel()
+        frameAnimation?.stop()
+        frameAnimation = null
         overlayView?.let { windowManager?.removeView(it) }
         overlayView = null
 
@@ -162,4 +205,6 @@ class BreakOverlayService : Service() {
         super.onDestroy()
         dismissOverlay()
     }
+
+    private fun Int.dp(): Int = (this * resources.displayMetrics.density).toInt()
 }

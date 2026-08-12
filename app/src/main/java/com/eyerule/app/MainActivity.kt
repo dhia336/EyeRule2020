@@ -4,6 +4,7 @@ import android.Manifest
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -16,8 +17,8 @@ import android.provider.Settings
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
+import android.widget.NumberPicker
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 
@@ -27,14 +28,21 @@ class MainActivity : Activity() {
     private val supportUrl = "https://gumroad.com/"
 
     private lateinit var prefs: SharedPreferences
-    private lateinit var intervalInput: EditText
-    private lateinit var breakSecondsInput: EditText
-    private lateinit var soundCheckbox: CheckBox
-    private lateinit var unskippableCheckbox: CheckBox
-    private lateinit var resetOnUnlockCheckbox: CheckBox
-    private lateinit var statusDot: View
-    private lateinit var statusBadgeLabel: TextView
+
+    private lateinit var progressRing: CircularProgressView
     private lateinit var countdownText: TextView
+    private lateinit var statusBadgeLabel: TextView
+
+    private lateinit var intervalCard: View
+    private lateinit var breakCard: View
+    private lateinit var intervalRing: CircularProgressView
+    private lateinit var breakRing: CircularProgressView
+    private lateinit var intervalValueText: TextView
+    private lateinit var breakValueText: TextView
+
+    private lateinit var soundSwitch: Switch
+    private lateinit var unskippableSwitch: Switch
+    private lateinit var resetOnUnlockSwitch: Switch
     private lateinit var toggleButton: Button
     private lateinit var supportLink: TextView
 
@@ -53,31 +61,64 @@ class MainActivity : Activity() {
         setContentView(R.layout.activity_main)
 
         prefs = getSharedPreferences("eyerule_prefs", MODE_PRIVATE)
-        intervalInput = findViewById(R.id.intervalInput)
-        breakSecondsInput = findViewById(R.id.breakSecondsInput)
-        soundCheckbox = findViewById(R.id.soundCheckbox)
-        unskippableCheckbox = findViewById(R.id.unskippableCheckbox)
-        resetOnUnlockCheckbox = findViewById(R.id.resetOnUnlockCheckbox)
-        statusDot = findViewById(R.id.statusDot)
-        statusBadgeLabel = findViewById(R.id.statusBadgeLabel)
+
+        progressRing = findViewById(R.id.progressRing)
         countdownText = findViewById(R.id.countdownText)
+        statusBadgeLabel = findViewById(R.id.statusBadgeLabel)
+
+        intervalCard = findViewById(R.id.intervalCard)
+        breakCard = findViewById(R.id.breakCard)
+        intervalRing = findViewById(R.id.intervalRing)
+        breakRing = findViewById(R.id.breakRing)
+        intervalValueText = findViewById(R.id.intervalValueText)
+        breakValueText = findViewById(R.id.breakValueText)
+
+        soundSwitch = findViewById(R.id.soundSwitch)
+        unskippableSwitch = findViewById(R.id.unskippableSwitch)
+        resetOnUnlockSwitch = findViewById(R.id.resetOnUnlockSwitch)
         toggleButton = findViewById(R.id.toggleButton)
         supportLink = findViewById(R.id.supportLink)
 
-        intervalInput.setText(prefs.getInt("interval_minutes", 20).toString())
-        breakSecondsInput.setText(prefs.getInt("break_seconds", 20).toString())
-        soundCheckbox.isChecked = prefs.getBoolean("play_sound", true)
-        unskippableCheckbox.isChecked = prefs.getBoolean("unskippable", false)
-        resetOnUnlockCheckbox.isChecked = prefs.getBoolean("restart_on_unlock", false)
+        setupRingColors()
 
-        soundCheckbox.setOnCheckedChangeListener { _, isChecked ->
+        soundSwitch.isChecked = prefs.getBoolean("play_sound", true)
+        unskippableSwitch.isChecked = prefs.getBoolean("unskippable", false)
+        resetOnUnlockSwitch.isChecked = prefs.getBoolean("restart_on_unlock", false)
+
+        soundSwitch.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("play_sound", isChecked).apply()
         }
-        unskippableCheckbox.setOnCheckedChangeListener { _, isChecked ->
+        unskippableSwitch.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("unskippable", isChecked).apply()
         }
-        resetOnUnlockCheckbox.setOnCheckedChangeListener { _, isChecked ->
+        resetOnUnlockSwitch.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("restart_on_unlock", isChecked).apply()
+        }
+
+        intervalCard.setOnClickListener {
+            if (!AlarmScheduler.isRunning(prefs)) {
+                showNumberPickerDialog(
+                    title = "Interval (minutes)",
+                    min = 1, max = 120,
+                    current = prefs.getInt("interval_minutes", 20)
+                ) { picked ->
+                    prefs.edit().putInt("interval_minutes", picked).apply()
+                    refreshDialValues()
+                }
+            }
+        }
+
+        breakCard.setOnClickListener {
+            if (!AlarmScheduler.isRunning(prefs)) {
+                showNumberPickerDialog(
+                    title = "Break length (seconds)",
+                    min = 5, max = 120,
+                    current = prefs.getInt("break_seconds", 20)
+                ) { picked ->
+                    prefs.edit().putInt("break_seconds", picked).apply()
+                    refreshDialValues()
+                }
+            }
         }
 
         toggleButton.setOnClickListener {
@@ -98,6 +139,7 @@ class MainActivity : Activity() {
         }
 
         requestNotificationPermissionIfNeeded()
+        refreshDialValues()
         updateUi()
         if (savedInstanceState == null) {
             playEntranceAnimation()
@@ -121,6 +163,64 @@ class MainActivity : Activity() {
         pulseAnimator?.cancel()
     }
 
+    private fun setupRingColors() {
+        val track = resources.getColor(R.color.ring_track, theme)
+        val accent = resources.getColor(R.color.accent, theme)
+        val strokeMain = 16f.dp()
+        val strokeSmall = 8f.dp()
+
+        progressRing.trackColor = track
+        progressRing.progressColor = accent
+        progressRing.ringStrokeWidthPx = strokeMain
+
+        listOf(intervalRing, breakRing).forEach {
+            it.trackColor = track
+            it.progressColor = accent
+            it.ringStrokeWidthPx = strokeSmall
+            it.progress = 1f
+        }
+    }
+
+    private fun refreshDialValues() {
+        val minutes = prefs.getInt("interval_minutes", 20)
+        val breakSeconds = prefs.getInt("break_seconds", 20)
+        intervalValueText.text = minutes.toString()
+        breakValueText.text = breakSeconds.toString()
+    }
+
+    private fun showNumberPickerDialog(
+        title: String,
+        min: Int,
+        max: Int,
+        current: Int,
+        onPicked: (Int) -> Unit
+    ) {
+        val picker = NumberPicker(this).apply {
+            minValue = min
+            maxValue = max
+            value = current.coerceIn(min, max)
+        }
+
+        val container = android.widget.FrameLayout(this).apply {
+            val pad = 24f.dp().toInt()
+            setPadding(pad, pad, pad, pad)
+            addView(
+                picker,
+                android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.WRAP_CONTENT,
+                    android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+                ).apply { gravity = android.view.Gravity.CENTER }
+            )
+        }
+
+        AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog)
+            .setTitle(title)
+            .setView(container)
+            .setPositiveButton("Set") { _, _ -> onPicked(picker.value) }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
     private fun startRule() {
         if (!hasOverlayPermission()) {
             Toast.makeText(this, "Grant 'Display over other apps' permission, then hit Start again", Toast.LENGTH_LONG).show()
@@ -134,19 +234,7 @@ class MainActivity : Activity() {
             return
         }
 
-        val minutes = intervalInput.text.toString().toIntOrNull()
-        val breakSeconds = breakSecondsInput.text.toString().toIntOrNull()
-
-        if (minutes == null || minutes <= 0) {
-            Toast.makeText(this, "Enter a valid interval in minutes", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (breakSeconds == null || breakSeconds <= 0) {
-            Toast.makeText(this, "Enter a valid break length in seconds", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        prefs.edit().putInt("break_seconds", breakSeconds).apply()
+        val minutes = prefs.getInt("interval_minutes", 20)
         AlarmScheduler.schedule(this, prefs, minutes)
         updateUi()
     }
@@ -154,26 +242,29 @@ class MainActivity : Activity() {
     private fun updateUi() {
         val running = AlarmScheduler.isRunning(prefs)
 
-        statusBadgeLabel.text = if (running) "Running" else "Stopped"
-        statusDot.backgroundTintList = android.content.res.ColorStateList.valueOf(
-            resources.getColor(if (running) R.color.success_dot else R.color.text_muted, theme)
+        statusBadgeLabel.text = if (running) "RUNNING" else "STOPPED"
+        statusBadgeLabel.setTextColor(
+            resources.getColor(if (running) R.color.cyan else R.color.text_muted, theme)
         )
 
         toggleButton.text = if (running) "Stop" else "Start"
         toggleButton.setBackgroundResource(if (running) R.drawable.bg_button_stop else R.drawable.bg_button_primary)
 
-        intervalInput.isEnabled = !running
-        breakSecondsInput.isEnabled = !running
+        val cardAlpha = if (running) 0.5f else 1f
+        intervalCard.alpha = cardAlpha
+        breakCard.alpha = cardAlpha
+        intervalCard.isEnabled = !running
+        breakCard.isEnabled = !running
 
         updatePulse(running)
         updateCountdown()
     }
 
-    /** A slow, gentle breathing pulse on the status dot while the rule is running - calm, not urgent. */
+    /** A slow, gentle breathing pulse on the status label while running - calm, not urgent. */
     private fun updatePulse(running: Boolean) {
         if (running) {
             if (pulseAnimator == null) {
-                val animator = ObjectAnimator.ofFloat(statusDot, View.ALPHA, 1f, 0.35f).apply {
+                val animator = ObjectAnimator.ofFloat(statusBadgeLabel, View.ALPHA, 1f, 0.4f).apply {
                     duration = 1400
                     repeatCount = ValueAnimator.INFINITE
                     repeatMode = ValueAnimator.REVERSE
@@ -184,20 +275,28 @@ class MainActivity : Activity() {
         } else {
             pulseAnimator?.cancel()
             pulseAnimator = null
-            statusDot.alpha = 1f
+            statusBadgeLabel.alpha = 1f
         }
     }
 
     private fun updateCountdown() {
         val remaining = AlarmScheduler.millisRemaining(prefs)
-        countdownText.text = if (remaining == null) {
-            "--:--"
-        } else {
-            val totalSeconds = remaining / 1000
-            val m = totalSeconds / 60
-            val s = totalSeconds % 60
-            "%02d:%02d".format(m, s)
+        if (remaining == null) {
+            countdownText.text = "--:--"
+            progressRing.progress = 0f
+            return
         }
+
+        val totalSeconds = remaining / 1000
+        val m = totalSeconds / 60
+        val s = totalSeconds % 60
+        countdownText.text = "%02d:%02d".format(m, s)
+
+        val totalMillis = prefs.getInt("interval_minutes", 20) * 60_000L
+        val elapsedFraction = if (totalMillis > 0) {
+            1f - (remaining.toFloat() / totalMillis.toFloat())
+        } else 0f
+        progressRing.progress = elapsedFraction.coerceIn(0f, 1f)
     }
 
     /** Soft, staggered fade + rise on first load - deliberately understated. */
@@ -206,7 +305,7 @@ class MainActivity : Activity() {
         val statusCard = findViewById<View>(R.id.statusCard)
         val settingsCard = findViewById<View>(R.id.settingsCard)
 
-        val views = listOf(header, statusCard, settingsCard, toggleButton, supportLink)
+        val views = listOf(header, statusCard, intervalCard, breakCard, settingsCard, toggleButton, supportLink)
         views.forEach {
             it.alpha = 0f
             it.translationY = 28f
@@ -216,7 +315,7 @@ class MainActivity : Activity() {
             view.animate()
                 .alpha(1f)
                 .translationY(0f)
-                .setStartDelay(index * 70L)
+                .setStartDelay(index * 60L)
                 .setDuration(420)
                 .setInterpolator(DecelerateInterpolator())
                 .start()
@@ -263,4 +362,6 @@ class MainActivity : Activity() {
             }
         }
     }
+
+    private fun Float.dp(): Float = this * resources.displayMetrics.density
 }
