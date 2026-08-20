@@ -7,6 +7,18 @@ whatever you're doing when it's time for a break.
 Interval and break length are both adjustable. No account, no ads, no
 network access beyond the optional support link.
 
+## Demo
+
+<video src="docs/screenshots/wy9uQlTa.mp4" controls width="480"></video>
+
+## Screenshots
+
+![Main screen](docs/screenshots/8AJ2_Urn.jpg)
+
+![Break reminder](docs/screenshots/iDzzF0lD.jpg)
+
+![Settings screen](docs/screenshots/lUvZXEyX.jpg)
+
 ## Features
 
 - Fullscreen break overlay, works on top of any app
