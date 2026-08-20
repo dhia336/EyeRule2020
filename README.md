@@ -9,15 +9,15 @@ network access beyond the optional support link.
 
 ## Demo
 
-<video src="docs/screenshots/wy9uQlTa.mp4" controls width="480"></video>
+![Demo](docs/screenshots/demo.gif)
 
 ## Screenshots
 
-![Main screen](docs/screenshots/8AJ2_Urn.jpg)
+<img src="docs/screenshots/8AJ2_Urn.jpg" alt="Main screen" width="280" />
 
-![Break reminder](docs/screenshots/iDzzF0lD.jpg)
+<img src="docs/screenshots/iDzzF0lD.jpg" alt="Break reminder" width="280" />
 
-![Settings screen](docs/screenshots/lUvZXEyX.jpg)
+<img src="docs/screenshots/lUvZXEyX.jpg" alt="Settings screen" width="280" />
 
 ## Features
 
