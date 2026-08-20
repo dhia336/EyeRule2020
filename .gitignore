@@ -1,0 +1,69 @@
+# Android / Gradle
+/build/
+/app/build/
+/.gradle/
+**/build/
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+
+# Local configuration
+local.properties
+
+# Keystore files
+*.jks
+*.keystore
+
+# OS files
+.DS_Store
+
+# Generated files
+/app/.cxx/
+/captures/
+/outputs/
+
+# Kotlin/Java
+.gradle/
+/.gradle/
+/.idea/
+build/
+bin/
+gen/
+
+# Misc
+*.log
+*.tmp
+# Gradle
+.gradle/
+build/
+**/build/
+
+
+# Local configuration
+local.properties
+
+# Generated Android files
+.externalNativeBuild/
+.cxx/
+
+# Kotlin
+.kotlin/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# APKs
+*.apk
+*.aab
+
+# Keystores / signing files
+*.jks
+*.keystore
+
+# Firebase / Google service credentials
+google-services.json

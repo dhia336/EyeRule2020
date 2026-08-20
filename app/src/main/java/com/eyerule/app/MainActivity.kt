@@ -25,7 +25,7 @@ import android.widget.Toast
 class MainActivity : Activity() {
 
     // Placeholder - swap for your real Gumroad link.
-    private val supportUrl = "https://gumroad.com/"
+    private val supportUrl = "https://medhianaffeti.gumroad.com/coffee"
 
     private lateinit var prefs: SharedPreferences
 
