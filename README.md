@@ -9,8 +9,8 @@ network access beyond the optional support link.
 
 ## Demo
 
-![Demo](docs/screenshots/demo.gif)
-
+[![Demo](docs/screenshots/demo.gif)
+](https://github.com/user-attachments/assets/c547d86b-3090-4e06-bf6c-718806a4b85f)
 ## Screenshots
 <span>
 <img src="docs/screenshots/8AJ2_Urn.jpg" alt="Main screen" width="280" />
