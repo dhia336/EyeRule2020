@@ -27,12 +27,12 @@ class CountdownService : Service() {
         }
     }
 
-    // Fires when the user unlocks the screen. Only acts if "restart_on_unlock"
+    // Fires when the user unlocks the screen. Only acts if "reset on unlock"
     // is enabled, and only while the rule is actually running.
     private val unlockReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == Intent.ACTION_USER_PRESENT &&
-                prefs.getBoolean("restart_on_unlock", false) &&
+                prefs.getBoolean(Prefs.RESTART_ON_UNLOCK, false) &&
                 AlarmScheduler.isRunning(prefs)
             ) {
                 AlarmScheduler.armNextAlarm(this@CountdownService, prefs)
@@ -45,7 +45,7 @@ class CountdownService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        prefs = getSharedPreferences("eyerule_prefs", MODE_PRIVATE)
+        prefs = Prefs.from(this)
         createChannel()
         registerReceiver(unlockReceiver, IntentFilter(Intent.ACTION_USER_PRESENT))
         receiverRegistered = true

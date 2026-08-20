@@ -1,5 +1,6 @@
 package com.eyerule.app
 
+import android.app.KeyguardManager
 import android.app.Service
 import android.content.Intent
 import android.graphics.Color
@@ -9,7 +10,9 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Build
 import android.os.CountDownTimer
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -25,25 +28,54 @@ class BreakOverlayService : Service() {
     private var timer: CountDownTimer? = null
     private var toneGenerator: ToneGenerator? = null
     private var frameAnimation: AnimationDrawable? = null
+    private val beepHandler = Handler(Looper.getMainLooper())
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val prefs = getSharedPreferences("eyerule_prefs", MODE_PRIVATE)
-        val breakSeconds = prefs.getInt("break_seconds", 20)
-        val unskippable = prefs.getBoolean("unskippable", false)
-        if (prefs.getBoolean("play_sound", true)) {
+        val prefs = Prefs.from(this)
+
+        // If "reset on unlock" is on and the screen is currently locked, skip this
+        // break entirely - no beep, no overlay. Android won't draw an overlay over
+        // the secure lock screen anyway (it just sits there hidden until unlock,
+        // which is what caused the "surprise black screen right after unlocking"
+        // bug), and the next unlock already re-arms a fresh interval on its own
+        // (see CountdownService), so nothing is lost by skipping.
+        if (prefs.getBoolean(Prefs.RESTART_ON_UNLOCK, false) && isDeviceLocked()) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        val breakSeconds = prefs.getInt(Prefs.BREAK_SECONDS, Prefs.DEFAULT_BREAK_SECONDS)
+        val unskippable = prefs.getBoolean(Prefs.UNSKIPPABLE, false)
+        if (prefs.getBoolean(Prefs.PLAY_SOUND, true)) {
             playBeep()
         }
         showOverlay(breakSeconds, unskippable)
         return START_NOT_STICKY
     }
 
+    private fun isDeviceLocked(): Boolean {
+        val km = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
+        return km.isKeyguardLocked
+    }
+
+    /** Three short beeps rather than one long tone - easier to notice, less jarring. */
     private fun playBeep() {
         try {
             val generator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 90)
             toneGenerator = generator
-            generator.startTone(ToneGenerator.TONE_PROP_BEEP, 400)
+
+            val beepDurationMs = 120
+            val gapMs = 150L
+
+            generator.startTone(ToneGenerator.TONE_PROP_BEEP, beepDurationMs)
+            beepHandler.postDelayed({
+                generator.startTone(ToneGenerator.TONE_PROP_BEEP, beepDurationMs)
+            }, gapMs)
+            beepHandler.postDelayed({
+                generator.startTone(ToneGenerator.TONE_PROP_BEEP, beepDurationMs)
+            }, gapMs * 2)
         } catch (e: RuntimeException) {
             // Some devices refuse to allocate a ToneGenerator (e.g. audio in use
             // by something else) - silently skip the beep rather than crash.
@@ -187,13 +219,14 @@ class BreakOverlayService : Service() {
         overlayView?.let { windowManager?.removeView(it) }
         overlayView = null
 
+        beepHandler.removeCallbacksAndMessages(null)
         toneGenerator?.release()
         toneGenerator = null
 
         // Only now, once the pause has genuinely ended, arm the next break.
         // This keeps the real gap between breaks equal to the chosen interval,
         // rather than the interval being eaten into by however long the pause ran.
-        val prefs = getSharedPreferences("eyerule_prefs", MODE_PRIVATE)
+        val prefs = Prefs.from(this)
         if (AlarmScheduler.isRunning(prefs)) {
             AlarmScheduler.armNextAlarm(this, prefs)
         }

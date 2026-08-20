@@ -7,9 +7,9 @@ import android.content.Intent
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            val prefs = context.getSharedPreferences("eyerule_prefs", Context.MODE_PRIVATE)
+            val prefs = Prefs.from(context)
             if (AlarmScheduler.isRunning(prefs)) {
-                val minutes = prefs.getInt("interval_minutes", 20)
+                val minutes = prefs.getInt(Prefs.INTERVAL_MINUTES, Prefs.DEFAULT_INTERVAL_MINUTES)
                 AlarmScheduler.schedule(context, prefs, minutes)
             }
         }

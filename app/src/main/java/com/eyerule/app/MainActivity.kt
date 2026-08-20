@@ -25,7 +25,7 @@ import android.widget.Toast
 class MainActivity : Activity() {
 
     // Placeholder - swap for your real Gumroad link.
-    private val supportUrl = "https://medhianaffeti.gumroad.com/coffee"
+    private val supportUrl = "https://gumroad.com/"
 
     private lateinit var prefs: SharedPreferences
 
@@ -60,7 +60,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        prefs = getSharedPreferences("eyerule_prefs", MODE_PRIVATE)
+        prefs = Prefs.from(this)
 
         progressRing = findViewById(R.id.progressRing)
         countdownText = findViewById(R.id.countdownText)
@@ -81,18 +81,18 @@ class MainActivity : Activity() {
 
         setupRingColors()
 
-        soundSwitch.isChecked = prefs.getBoolean("play_sound", true)
-        unskippableSwitch.isChecked = prefs.getBoolean("unskippable", false)
-        resetOnUnlockSwitch.isChecked = prefs.getBoolean("restart_on_unlock", false)
+        soundSwitch.isChecked = prefs.getBoolean(Prefs.PLAY_SOUND, true)
+        unskippableSwitch.isChecked = prefs.getBoolean(Prefs.UNSKIPPABLE, false)
+        resetOnUnlockSwitch.isChecked = prefs.getBoolean(Prefs.RESTART_ON_UNLOCK, false)
 
         soundSwitch.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean("play_sound", isChecked).apply()
+            prefs.edit().putBoolean(Prefs.PLAY_SOUND, isChecked).apply()
         }
         unskippableSwitch.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean("unskippable", isChecked).apply()
+            prefs.edit().putBoolean(Prefs.UNSKIPPABLE, isChecked).apply()
         }
         resetOnUnlockSwitch.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean("restart_on_unlock", isChecked).apply()
+            prefs.edit().putBoolean(Prefs.RESTART_ON_UNLOCK, isChecked).apply()
         }
 
         intervalCard.setOnClickListener {
@@ -100,9 +100,9 @@ class MainActivity : Activity() {
                 showNumberPickerDialog(
                     title = "Interval (minutes)",
                     min = 1, max = 120,
-                    current = prefs.getInt("interval_minutes", 20)
+                    current = prefs.getInt(Prefs.INTERVAL_MINUTES, Prefs.DEFAULT_INTERVAL_MINUTES)
                 ) { picked ->
-                    prefs.edit().putInt("interval_minutes", picked).apply()
+                    prefs.edit().putInt(Prefs.INTERVAL_MINUTES, picked).apply()
                     refreshDialValues()
                 }
             }
@@ -113,9 +113,9 @@ class MainActivity : Activity() {
                 showNumberPickerDialog(
                     title = "Break length (seconds)",
                     min = 5, max = 120,
-                    current = prefs.getInt("break_seconds", 20)
+                    current = prefs.getInt(Prefs.BREAK_SECONDS, Prefs.DEFAULT_BREAK_SECONDS)
                 ) { picked ->
-                    prefs.edit().putInt("break_seconds", picked).apply()
+                    prefs.edit().putInt(Prefs.BREAK_SECONDS, picked).apply()
                     refreshDialValues()
                 }
             }
@@ -182,8 +182,8 @@ class MainActivity : Activity() {
     }
 
     private fun refreshDialValues() {
-        val minutes = prefs.getInt("interval_minutes", 20)
-        val breakSeconds = prefs.getInt("break_seconds", 20)
+        val minutes = prefs.getInt(Prefs.INTERVAL_MINUTES, Prefs.DEFAULT_INTERVAL_MINUTES)
+        val breakSeconds = prefs.getInt(Prefs.BREAK_SECONDS, Prefs.DEFAULT_BREAK_SECONDS)
         intervalValueText.text = minutes.toString()
         breakValueText.text = breakSeconds.toString()
     }
@@ -234,7 +234,7 @@ class MainActivity : Activity() {
             return
         }
 
-        val minutes = prefs.getInt("interval_minutes", 20)
+        val minutes = prefs.getInt(Prefs.INTERVAL_MINUTES, Prefs.DEFAULT_INTERVAL_MINUTES)
         AlarmScheduler.schedule(this, prefs, minutes)
         updateUi()
     }
@@ -292,7 +292,7 @@ class MainActivity : Activity() {
         val s = totalSeconds % 60
         countdownText.text = "%02d:%02d".format(m, s)
 
-        val totalMillis = prefs.getInt("interval_minutes", 20) * 60_000L
+        val totalMillis = prefs.getInt(Prefs.INTERVAL_MINUTES, Prefs.DEFAULT_INTERVAL_MINUTES) * 60_000L
         val elapsedFraction = if (totalMillis > 0) {
             1f - (remaining.toFloat() / totalMillis.toFloat())
         } else 0f

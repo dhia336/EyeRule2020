@@ -1,69 +1,22 @@
-# Android / Gradle
-/build/
-/app/build/
-/.gradle/
-**/build/
-
-# IntelliJ / Android Studio
-.idea/
-*.iml
-
-# Local configuration
-local.properties
-
-# Keystore files
-*.jks
-*.keystore
-
-# OS files
-.DS_Store
-
-# Generated files
-/app/.cxx/
-/captures/
-/outputs/
-
-# Kotlin/Java
-.gradle/
-/.gradle/
-/.idea/
-build/
-bin/
-gen/
-
-# Misc
-*.log
-*.tmp
 # Gradle
 .gradle/
 build/
-**/build/
+app/build/
 
-
-# Local configuration
+# Local config - contains machine-specific SDK path, never commit this
 local.properties
 
-# Generated Android files
-.externalNativeBuild/
-.cxx/
+# IDE
+.idea/
+*.iml
+.vscode/
 
-# Kotlin
-.kotlin/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# APKs
+# Android
 *.apk
 *.aab
+*.ap_
+*.dex
 
-# Keystores / signing files
-*.jks
-*.keystore
-
-# Firebase / Google service credentials
-google-services.json
+# OS
+.DS_Store
+Thumbs.db
