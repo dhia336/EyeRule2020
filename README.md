@@ -12,12 +12,14 @@ network access beyond the optional support link.
 ![Demo](docs/screenshots/demo.gif)
 
 ## Screenshots
-
+<span>
 <img src="docs/screenshots/8AJ2_Urn.jpg" alt="Main screen" width="280" />
 
 <img src="docs/screenshots/iDzzF0lD.jpg" alt="Break reminder" width="280" />
 
 <img src="docs/screenshots/lUvZXEyX.jpg" alt="Settings screen" width="280" />
+</span>
+
 
 ## Features
 
